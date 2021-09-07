@@ -1,0 +1,16 @@
+
+Application:
+  Name: "account-service"              # 应用名称
+  Mode: "development"          # 模式：development, test, production
+  Port: 8888                   # 端口号
+  LogLevel: "debug"            # 日志等级：debug, info, error, warn, panic, fatal
+  LogMaxSaveDay: 7             # 日志最大保存天数
+  LogOutPath: "file"        # 日志输出路径：console, file
+
+DataSource:
+  DriverName: "mysql"
+  Addr: "127.0.0.1"
+  Database: "jingwei-exchange"
+  User: "root"
+  Password: "root"
+  Charset: "utf8mb4"
