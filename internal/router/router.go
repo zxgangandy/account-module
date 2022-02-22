@@ -51,7 +51,7 @@ func NewRouter() *gin.Engine {
 	apiV1.Use()
 	{
 		// 认证相关路由
-		apiV1.POST("/account")
+		apiV1.POST("/account", controller.CreateAccount)
 		//apiV1.POST("/register", user.Register)
 		//apiV1.POST("/login", user.Login)
 		//apiV1.POST("/login/phone", user.PhoneLogin)
