@@ -19,7 +19,7 @@ func NewAccountService() *AccountService {
 	return &AccountService{spotAccountDao: spotAccountDao}
 }
 
-func (s *AccountService) CreateAccount(userId int64, currency string) error {
+func (s *AccountService) CreateAccount(userId uint64, currency string) error {
 	return s.spotAccountDao.Create(userId, currency)
 }
 
