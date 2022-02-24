@@ -2,12 +2,11 @@ package service
 
 import (
 	"account-module/internal/app/dao"
-	"container/list"
 )
 
 type IAccountService interface {
-	CreateAccount(userId int64, currency string) error
-	CreateAccountList(userIds *list.List, currencies *list.List) error
+	CreateAccount(userId uint64, currency string) (bool, error)
+	CreateAccountList(userIds []uint64, currencies []string) error
 }
 
 type AccountService struct {
@@ -19,10 +18,10 @@ func NewAccountService() *AccountService {
 	return &AccountService{spotAccountDao: spotAccountDao}
 }
 
-func (s *AccountService) CreateAccount(userId uint64, currency string) error {
+func (s *AccountService) CreateAccount(userId uint64, currency string) (bool, error) {
 	return s.spotAccountDao.Create(userId, currency)
 }
 
-func (s *AccountService) CreateAccountList(userIds *list.List, currencies *list.List) error {
-	return nil
+func (s *AccountService) CreateAccountList(userIds []uint64, currencies []string) error {
+	return s.spotAccountDao.CreateAccountList(userIds, currencies)
 }

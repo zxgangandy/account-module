@@ -92,7 +92,7 @@ func (e *Error) StatusCode() int {
 		return http.StatusServiceUnavailable
 	}
 
-	return http.StatusInternalServerError
+	return http.StatusOK
 }
 
 // Err represents an error

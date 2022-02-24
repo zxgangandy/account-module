@@ -52,6 +52,7 @@ func NewRouter() *gin.Engine {
 	{
 		// 认证相关路由
 		apiV1.POST("/account", controller.CreateAccount)
+		apiV1.POST("/account/list", controller.CreateAccountList)
 		//apiV1.POST("/register", user.Register)
 		//apiV1.POST("/login", user.Login)
 		//apiV1.POST("/login/phone", user.PhoneLogin)
@@ -96,6 +97,7 @@ func Router() *gin.Engine {
 	{
 		// 认证相关路由
 		apiV1.POST("/account", controller.CreateAccount)
+		apiV1.POST("/accounts", controller.CreateAccountList)
 	}
 
 	r.GET("/ping", func(c *gin.Context) {

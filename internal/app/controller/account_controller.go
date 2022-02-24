@@ -26,8 +26,35 @@ func CreateAccount(c *gin.Context) {
 		return
 	}
 
-	err := service.AccountServiceImpl.CreateAccount(req.UserID, req.Currency)
+	result, err := service.AccountServiceImpl.CreateAccount(req.UserID, req.Currency)
 	if err != nil {
+		model.R.Error(c, accounterr.ErrCreateAccount.WithDetails(err.Error()))
+		return
+	}
+
+	model.R.Success(c, result)
+}
+
+// CreateAccount 创建用户账户列表
+// @Summary 通过用户id和币种创建用户账户列表
+// @Description Create an account by user id list and currency list
+// @Tags 账户
+// @Accept  json
+// @Produce  json
+// @Param
+// @Success 200 {object}
+// @Router /v1/accounts [post]
+func CreateAccountList(c *gin.Context) {
+	var req model.CreateAccountListReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Warnf("create account bind params err : %v", err)
+		model.R.Error(c, baseerr.ErrBind.WithDetails(err.Error()))
+		return
+	}
+
+	err := service.AccountServiceImpl.CreateAccountList(req.UserIDList, req.CurrencyList)
+	if err != nil {
+		logger.Errorf("create account list err : %v", err)
 		model.R.Error(c, accounterr.ErrCreateAccount.WithDetails(err.Error()))
 		return
 	}
