@@ -3,6 +3,7 @@ package dao
 import (
 	"account-module/internal/app/model"
 	"account-module/pkg/datasource"
+	"account-module/pkg/utils"
 	"errors"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
@@ -11,6 +12,7 @@ import (
 type ISpotAccountDao interface {
 	Create(userId uint64, currency string) (bool, error)
 	CreateAccountList(userIds []uint64, currencies []string) error
+	GetExistAccounts(userIds []uint64, currency string) ([]uint64, error)
 }
 
 type SpotAccountDao struct {
@@ -53,6 +55,21 @@ func (s *SpotAccountDao) CreateAccountList(userIds []uint64, currencies []string
 
 		return nil
 	})
+}
+
+func (s *SpotAccountDao) GetExistAccounts(userIds []uint64, currency string) ([]uint64, error) {
+	var accounts []model.SpotAccount
+	var resUserIds []uint64
+	query := "user_id IN ? AND currency = ?"
+	err := s.db.Where(query, utils.Uint642String(userIds), currency).Find(&accounts).Error
+
+	if len(accounts) > 0 {
+		for k, v := range accounts {
+			resUserIds[k] = v.UserId
+		}
+	}
+
+	return resUserIds, err
 }
 
 func (s *SpotAccountDao) getAccountList(userId uint64, currencies []string) []model.SpotAccount {

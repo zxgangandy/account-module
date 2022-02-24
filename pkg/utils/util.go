@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"io"
 	"io/ioutil"
+	"strconv"
 
 	logger "github.com/sirupsen/logrus"
 )
@@ -19,4 +20,64 @@ func RequestLogger(c *gin.Context) {
 	logger.Debugf("request header: %s", c.Request.Header)
 	logger.Debugf("request body: %s", body)
 	c.Next()
+}
+
+func String2Int(strArr []string) []int {
+	res := make([]int, len(strArr))
+
+	for index, val := range strArr {
+		res[index], _ = strconv.Atoi(val)
+	}
+
+	return res
+}
+
+func String2Int64(strArr []string) []int64 {
+	res := make([]int64, len(strArr))
+
+	for index, val := range strArr {
+		res[index], _ = strconv.ParseInt(val, 10, 64)
+	}
+
+	return res
+}
+
+func String2Uint64(strArr []string) []uint64 {
+	res := make([]uint64, len(strArr))
+
+	for index, val := range strArr {
+		res[index], _ = strconv.ParseUint(val, 10, 64)
+	}
+
+	return res
+}
+
+func Int2String(intArr []int) []string {
+	res := make([]string, len(intArr))
+
+	for index, val := range intArr {
+		res[index] = strconv.Itoa(val)
+	}
+
+	return res
+}
+
+func Int642String(intArr []int64) []string {
+	res := make([]string, len(intArr))
+
+	for index, val := range intArr {
+		res[index] = strconv.FormatInt(val, 10)
+	}
+
+	return res
+}
+
+func Uint642String(intArr []uint64) []string {
+	res := make([]string, len(intArr))
+
+	for index, val := range intArr {
+		res[index] = strconv.FormatUint(val, 10)
+	}
+
+	return res
 }
