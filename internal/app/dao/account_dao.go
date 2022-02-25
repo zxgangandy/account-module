@@ -12,7 +12,7 @@ import (
 type ISpotAccountDao interface {
 	Create(userId uint64, currency string) (bool, error)
 	CreateAccountList(userIds []uint64, currencies []string) error
-	GetRegisteredAccounts(userIds []uint64, currency string) ([]uint64, error)
+	GetExistsAccounts(userIds []uint64, currency string) ([]uint64, error)
 }
 
 type SpotAccountDao struct {
@@ -57,7 +57,7 @@ func (s *SpotAccountDao) CreateAccountList(userIds []uint64, currencies []string
 	})
 }
 
-func (s *SpotAccountDao) GetRegisteredAccounts(userIds []uint64, currency string) ([]uint64, error) {
+func (s *SpotAccountDao) GetExistsAccounts(userIds []uint64, currency string) ([]uint64, error) {
 	var accounts []model.SpotAccount
 	var resUserIds []uint64
 	query := "user_id IN ? AND currency = ?"

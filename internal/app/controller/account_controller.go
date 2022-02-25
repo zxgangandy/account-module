@@ -71,7 +71,7 @@ func CreateAccountList(c *gin.Context) {
 // @Param
 // @Success 200 {object}
 // @Router /v1/account/exist [post]
-func GetRegisteredAccounts(c *gin.Context) {
+func GetExistsAccounts(c *gin.Context) {
 	var req model.ExistAccountListReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Warnf("Get existing account bind params err : %v", err)
@@ -79,12 +79,12 @@ func GetRegisteredAccounts(c *gin.Context) {
 		return
 	}
 
-	err := service.AccountServiceImpl.GetRegisteredAccounts(req.UserIDList, req.Currency)
+	userIds, err := service.AccountServiceImpl.GetExistsAccounts(req.UserIDList, req.Currency)
 	if err != nil {
 		logger.Errorf("Get existing account list err : %v", err)
 		model.R.Error(c, intererr.ErrGetExitsAccount.WithDetails(err.Error()))
 		return
 	}
 
-	model.R.Success(c, nil)
+	model.R.Success(c, userIds)
 }

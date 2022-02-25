@@ -51,9 +51,9 @@ func NewRouter() *gin.Engine {
 	apiV1.Use()
 	{
 		// 认证相关路由
-		apiV1.POST("/account", controller.CreateAccount)
-		apiV1.POST("/account/list", controller.CreateAccountList)
-		apiV1.POST("/v1/account/registered", controller.GetRegisteredAccounts)
+		//apiV1.POST("/account", controller.CreateAccount)
+		//apiV1.POST("/account/list", controller.CreateAccountList)
+		//apiV1.POST("/v1/account/registered", controller.GetExistsAccounts)
 
 		//apiV1.POST("/register", user.Register)
 		//apiV1.POST("/login", user.Login)
@@ -98,9 +98,9 @@ func Router() *gin.Engine {
 
 	{
 		// 认证相关路由
-		apiV1.POST("/account", controller.CreateAccount)
-		apiV1.POST("/accounts", controller.CreateAccountList)
-		apiV1.POST("/v1/account/registered", controller.GetRegisteredAccounts)
+		apiV1.POST("/account/create_one", controller.CreateAccount)
+		apiV1.POST("/account/create_list", controller.CreateAccountList)
+		apiV1.POST("/account/exist_list", controller.GetExistsAccounts)
 	}
 
 	r.GET("/ping", func(c *gin.Context) {
