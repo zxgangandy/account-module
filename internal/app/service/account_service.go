@@ -7,7 +7,7 @@ import (
 type IAccountService interface {
 	CreateAccount(userId uint64, currency string) (bool, error)
 	CreateAccountList(userIds []uint64, currencies []string) error
-	GetExistAccounts(userIds []uint64, currency string) error
+	GetRegisteredAccounts(userIds []uint64, currency string) error
 }
 
 type AccountService struct {
@@ -28,5 +28,5 @@ func (s *AccountService) CreateAccountList(userIds []uint64, currencies []string
 }
 
 func (s *AccountService) GetExistAccounts(userIds []uint64, currency string) ([]uint64, error) {
-	return s.spotAccountDao.GetExistAccounts(userIds, currency)
+	return s.spotAccountDao.GetRegisteredAccounts(userIds, currency)
 }

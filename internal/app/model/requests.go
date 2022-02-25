@@ -9,3 +9,8 @@ type CreateAccountListReq struct {
 	UserIDList   []uint64 `json:"userIds"`
 	CurrencyList []string `json:"currencies"`
 }
+
+type ExistAccountListReq struct {
+	UserIDList []uint64 `json:"userIds"`
+	Currency   string   `json:"currency"`
+}
