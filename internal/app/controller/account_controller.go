@@ -17,7 +17,7 @@ import (
 // @Produce  json
 // @Param
 // @Success 200 {object}
-// @Router /v1/account [post]
+// @Router /v1/account/create_oneK [post]
 func CreateAccount(c *gin.Context) {
 	var req model.CreateAccountReq
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -43,7 +43,7 @@ func CreateAccount(c *gin.Context) {
 // @Produce  json
 // @Param
 // @Success 200 {object}
-// @Router /v1/accounts [post]
+// @Router /v1/account/create_list [post]
 func CreateAccountList(c *gin.Context) {
 	var req model.CreateAccountListReq
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -63,14 +63,14 @@ func CreateAccountList(c *gin.Context) {
 }
 
 // CreateAccount 创建用户账户列表
-// @Summary 通过用户id和币种创建用户账户列表
-// @Description Create an account by user id list and currency list
+// @Summary 通过用户id列表和币种获取已经创建、存在的用户账户列表
+// @Description get accounts by user id list and the currency
 // @Tags 账户
 // @Accept  json
 // @Produce  json
 // @Param
 // @Success 200 {object}
-// @Router /v1/account/exist [post]
+// @Router /v1/account/exist_list [post]
 func GetExistsAccounts(c *gin.Context) {
 	var req model.ExistAccountListReq
 	if err := c.ShouldBindJSON(&req); err != nil {
