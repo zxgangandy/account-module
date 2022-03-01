@@ -29,7 +29,11 @@ type Application struct {
 	LogMaxSaveDay int
 }
 
-func GetConfig() *AppConfig {
+var (
+	Config *AppConfig
+)
+
+func Init() {
 	var appConfig AppConfig
 	var configOnce sync.Once
 
@@ -47,5 +51,5 @@ func GetConfig() *AppConfig {
 		}
 	})
 
-	return &appConfig
+	Config = &appConfig
 }

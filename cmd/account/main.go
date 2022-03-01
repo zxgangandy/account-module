@@ -13,11 +13,10 @@ import (
 
 func main() {
 	logger.Init()
-
-	config := conf.GetConfig()
+	conf.Init()
 
 	rootCmd := &cobra.Command{
-		Use:   config.Application.Name,
+		Use:   conf.Config.Application.Name,
 		Short: "Account service",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			datasource.Init()

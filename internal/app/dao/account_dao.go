@@ -63,12 +63,6 @@ func (s *SpotAccountDao) GetExistsAccounts(userIds []uint64, currency string) ([
 	query := "user_id IN ? AND currency = ?"
 	err := s.db.Where(query, utils.Uint642String(userIds), currency).Find(&accounts).Error
 
-	//if len(accounts) > 0 {
-	//	for k, v := range accounts {
-	//		resUserIds[k] = v.UserId
-	//	}
-	//}
-
 	for k, v := range accounts {
 		resUserIds[k] = v.UserId
 	}
