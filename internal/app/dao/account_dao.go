@@ -3,6 +3,7 @@ package dao
 import (
 	"account-module/internal/app/model"
 	"account-module/pkg/datasource"
+	"account-module/pkg/idgen"
 	"account-module/pkg/utils"
 	"errors"
 	"github.com/shopspring/decimal"
@@ -10,9 +11,9 @@ import (
 )
 
 type ISpotAccountDao interface {
-	Create(userId uint64, currency string) (bool, error)
-	CreateAccountList(userIds []uint64, currencies []string) error
-	GetExistsAccounts(userIds []uint64, currency string) ([]uint64, error)
+	Create(userId int64, currency string) (bool, error)
+	CreateAccountList(userIds []int64, currencies []string) error
+	GetExistsAccounts(userIds []int64, currency string) ([]int64, error)
 }
 
 type SpotAccountDao struct {
@@ -23,7 +24,7 @@ func NewSpotAccountDao() *SpotAccountDao {
 	return &SpotAccountDao{db: datasource.GetDB()}
 }
 
-func (s *SpotAccountDao) Create(userId uint64, currency string) (bool, error) {
+func (s *SpotAccountDao) Create(userId int64, currency string) (bool, error) {
 	err := s.db.Create(&model.SpotAccount{
 		AccountId: 1,
 		UserId:    userId,
@@ -37,7 +38,7 @@ func (s *SpotAccountDao) Create(userId uint64, currency string) (bool, error) {
 	return true, nil
 }
 
-func (s *SpotAccountDao) CreateAccountList(userIds []uint64, currencies []string) error {
+func (s *SpotAccountDao) CreateAccountList(userIds []int64, currencies []string) error {
 	uidLen := len(userIds)
 	currencyLen := len(currencies)
 	if uidLen <= 0 || currencyLen <= 0 {
@@ -57,11 +58,11 @@ func (s *SpotAccountDao) CreateAccountList(userIds []uint64, currencies []string
 	})
 }
 
-func (s *SpotAccountDao) GetExistsAccounts(userIds []uint64, currency string) ([]uint64, error) {
+func (s *SpotAccountDao) GetExistsAccounts(userIds []int64, currency string) ([]int64, error) {
 	var accounts []model.SpotAccount
-	var resUserIds []uint64
+	var resUserIds []int64
 	query := "user_id IN ? AND currency = ?"
-	err := s.db.Where(query, utils.Uint642String(userIds), currency).Find(&accounts).Error
+	err := s.db.Where(query, utils.Int642String(userIds), currency).Find(&accounts).Error
 
 	for k, v := range accounts {
 		resUserIds[k] = v.UserId
@@ -70,12 +71,12 @@ func (s *SpotAccountDao) GetExistsAccounts(userIds []uint64, currency string) ([
 	return resUserIds, err
 }
 
-func (s *SpotAccountDao) getAccountList(userId uint64, currencies []string) []model.SpotAccount {
+func (s *SpotAccountDao) getAccountList(userId int64, currencies []string) []model.SpotAccount {
 	var accountList []model.SpotAccount
 
 	for _, v := range currencies {
 		accountList = append(accountList, model.SpotAccount{
-			AccountId: 1,
+			AccountId: idgen.Get().GetUID(),
 			UserId:    userId,
 			Currency:  v,
 			Balance:   decimal.Zero,

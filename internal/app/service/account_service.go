@@ -5,9 +5,9 @@ import (
 )
 
 type IAccountService interface {
-	CreateAccount(userId uint64, currency string) (bool, error)
-	CreateAccountList(userIds []uint64, currencies []string) error
-	GetExistsAccounts(userIds []uint64, currency string) ([]uint64, error)
+	CreateAccount(userId int64, currency string) (bool, error)
+	CreateAccountList(userIds []int64, currencies []string) error
+	GetExistsAccounts(userIds []int64, currency string) ([]uint64, error)
 }
 
 type AccountService struct {
@@ -19,14 +19,14 @@ func NewAccountService() *AccountService {
 	return &AccountService{spotAccountDao: spotAccountDao}
 }
 
-func (s *AccountService) CreateAccount(userId uint64, currency string) (bool, error) {
+func (s *AccountService) CreateAccount(userId int64, currency string) (bool, error) {
 	return s.spotAccountDao.Create(userId, currency)
 }
 
-func (s *AccountService) CreateAccountList(userIds []uint64, currencies []string) error {
+func (s *AccountService) CreateAccountList(userIds []int64, currencies []string) error {
 	return s.spotAccountDao.CreateAccountList(userIds, currencies)
 }
 
-func (s *AccountService) GetExistsAccounts(userIds []uint64, currency string) ([]uint64, error) {
+func (s *AccountService) GetExistsAccounts(userIds []int64, currency string) ([]int64, error) {
 	return s.spotAccountDao.GetExistsAccounts(userIds, currency)
 }

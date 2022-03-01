@@ -3,19 +3,21 @@ package idgen
 import (
 	"account-module/pkg/conf"
 	"account-module/pkg/datasource"
+	"github.com/zxgangandy/gid"
 	gidConf "github.com/zxgangandy/gid/config"
 	"strconv"
 )
 
 var (
-	UidConfig *gidConf.DefaultUidConfig
+	IdGenerator *gid.DefaultUidGenerator
 )
 
 func Init(conf *conf.AppConfig) {
 	appPort := strconv.Itoa(conf.Application.Port)
-	UidConfig = gidConf.New(datasource.GetDB(), appPort)
+	config := gidConf.New(datasource.GetDB(), appPort)
+	IdGenerator = gid.New(config)
 }
 
-func GetIdgenConfig() *gidConf.DefaultUidConfig {
-	return UidConfig
+func Get() *gid.DefaultUidGenerator {
+	return IdGenerator
 }

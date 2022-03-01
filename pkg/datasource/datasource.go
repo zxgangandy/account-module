@@ -19,7 +19,7 @@ func Init() {
 
 // MYSQL驱动
 func InitGormDB() *gorm.DB {
-	config := conf.GetConfig()
+	config := conf.Config
 
 	host := config.DataSource.Addr
 	database := config.DataSource.Database
