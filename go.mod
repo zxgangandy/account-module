@@ -12,8 +12,8 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.8.1
-	github.com/zxgangandy/gid v0.0.6
+	github.com/zxgangandy/gid v0.0.8
 	golang.org/x/text v0.3.6 // indirect
-	gorm.io/driver/mysql v1.1.1
+	gorm.io/driver/mysql v1.3.2
 	gorm.io/gorm v1.23.1
 )

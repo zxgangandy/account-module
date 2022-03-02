@@ -88,7 +88,7 @@ func Router() *gin.Engine {
 	//	router.InitTestRouter(PublicGroup)
 	//}
 
-	config := conf.GetConfig()
+	config := conf.Config
 	if config.Application.LogLevel == "debug" {
 		r.Use(utils.RequestLogger)
 	}

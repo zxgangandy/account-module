@@ -26,7 +26,7 @@ func NewSpotAccountDao() *SpotAccountDao {
 
 func (s *SpotAccountDao) Create(userId int64, currency string) (bool, error) {
 	err := s.db.Create(&model.SpotAccount{
-		AccountId: 1,
+		AccountId: idgen.Get().GetUID(),
 		UserId:    userId,
 		Currency:  currency,
 		Balance:   decimal.Zero,

@@ -13,7 +13,7 @@ import (
 
 // 日志配置
 func Init() {
-	config := conf.GetConfig()
+	config := conf.Config
 
 	logrus.SetReportCaller(true)
 

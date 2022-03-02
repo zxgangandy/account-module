@@ -12,8 +12,8 @@ import (
 )
 
 func main() {
-	logger.Init()
 	conf.Init()
+	logger.Init()
 
 	rootCmd := &cobra.Command{
 		Use:   conf.Config.Application.Name,

@@ -35,7 +35,7 @@ import (
 )
 
 func Run() {
-	config := conf.GetConfig()
+	config := conf.Config
 	router := router.Router()
 	server := &http.Server{
 		Addr:           ":" + strconv.Itoa(config.Application.Port),

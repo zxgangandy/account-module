@@ -7,7 +7,7 @@ import (
 type IAccountService interface {
 	CreateAccount(userId int64, currency string) (bool, error)
 	CreateAccountList(userIds []int64, currencies []string) error
-	GetExistsAccounts(userIds []int64, currency string) ([]uint64, error)
+	GetExistsAccounts(userIds []int64, currency string) ([]int64, error)
 }
 
 type AccountService struct {
