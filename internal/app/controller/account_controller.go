@@ -44,7 +44,7 @@ func CreateAccount(c *gin.Context) {
 // @Param
 // @Success 200 {object}
 // @Router /v1/account/create_list [post]
-func CreateAccountList(c *gin.Context) {
+func CreateAccounts(c *gin.Context) {
 	var req model.CreateAccountListReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Warnf("create account bind params err : %v", err)
@@ -89,8 +89,8 @@ func GetExistsAccounts(c *gin.Context) {
 	model.R.Success(c, userIds)
 }
 
-// CreateAccount 创建用户账户列表
-// @Summary 通过用户id列表和币种获取已经创建、存在的用户账户列表
+// FindAccount 查询某个用户的某币种账户
+// @Summary 通过用户id列表和币种获取已经创建、存在的用户账户
 // @Description get account by user id and the currency
 // @Tags 账户
 // @Accept  json
@@ -109,6 +109,33 @@ func FindAccount(c *gin.Context) {
 	userIds, err := service.AccountServiceImpl.GetAccount(req.UserId, req.Currency)
 	if err != nil {
 		logger.Errorf("Get account err : %v", err)
+		model.R.Error(c, intererr.ErrGetExitsAccount.WithDetails(err.Error()))
+		return
+	}
+
+	model.R.Success(c, userIds)
+}
+
+// FindAccounts 查询用户账户列表
+// @Summary 通过用户id列表已经创建、存在的用户账户列表
+// @Description get account by user id
+// @Tags 账户
+// @Accept  json
+// @Produce  json
+// @Param
+// @Success 200 {object}
+// @Router /v1/account/find_list [post]
+func FindAccounts(c *gin.Context) {
+	var req model.GetAccountsReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Warnf("Find accounts bind params err : %v", err)
+		model.R.Error(c, baseerr.ErrBind.WithDetails(err.Error()))
+		return
+	}
+
+	userIds, err := service.AccountServiceImpl.GetAccountsByUserId(req.UserId)
+	if err != nil {
+		logger.Errorf("Find accounts err : %v", err)
 		model.R.Error(c, intererr.ErrGetExitsAccount.WithDetails(err.Error()))
 		return
 	}

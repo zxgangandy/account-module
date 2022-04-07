@@ -19,3 +19,7 @@ type GetAccountReq struct {
 	UserId   int64  `json:"userId"`
 	Currency string `json:"currency"`
 }
+
+type GetAccountsReq struct {
+	UserId int64 `json:"userId"`
+}

@@ -10,6 +10,7 @@ type IAccountService interface {
 	CreateAccountList(userIds []int64, currencies []string) error
 	GetExistsAccounts(userIds []int64, currency string) ([]int64, error)
 	GetAccount(userId int64, currency string) (model.SpotAccount, error)
+	GetAccountsByUserId(userId int64) ([]model.SpotAccount, error)
 }
 
 type AccountService struct {
@@ -35,4 +36,8 @@ func (s *AccountService) GetExistsAccounts(userIds []int64, currency string) ([]
 
 func (s *AccountService) GetAccount(userId int64, currency string) (model.SpotAccount, error) {
 	return s.spotAccountDao.GetAccount(userId, currency)
+}
+
+func (s *AccountService) GetAccountsByUserId(userId int64) ([]model.SpotAccount, error) {
+	return s.spotAccountDao.GetAccountsByUserId(userId)
 }
