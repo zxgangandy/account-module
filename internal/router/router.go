@@ -101,6 +101,7 @@ func Router() *gin.Engine {
 		apiV1.POST("/account/create_one", controller.CreateAccount)
 		apiV1.POST("/account/create_list", controller.CreateAccountList)
 		apiV1.POST("/account/exist_list", controller.GetExistsAccounts)
+		apiV1.POST("/account/find_one", controller.FindAccount)
 	}
 
 	r.GET("/ping", func(c *gin.Context) {

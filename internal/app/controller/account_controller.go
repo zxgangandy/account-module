@@ -98,7 +98,7 @@ func GetExistsAccounts(c *gin.Context) {
 // @Param
 // @Success 200 {object}
 // @Router /v1/account/get_one [post]
-func GetAccount(c *gin.Context) {
+func FindAccount(c *gin.Context) {
 	var req model.GetAccountReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Warnf("Get account bind params err : %v", err)
