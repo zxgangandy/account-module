@@ -14,6 +14,7 @@ type ISpotAccountDao interface {
 	Create(userId int64, currency string) (bool, error)
 	CreateAccountList(userIds []int64, currencies []string) error
 	GetExistsAccounts(userIds []int64, currency string) ([]int64, error)
+	GetAccount(userId int64, currency string) (model.SpotAccount, error)
 }
 
 type SpotAccountDao struct {
@@ -69,6 +70,15 @@ func (s *SpotAccountDao) GetExistsAccounts(userIds []int64, currency string) ([]
 	}
 
 	return resUserIds, err
+}
+
+func (s *SpotAccountDao) GetAccount(userId int64, currency string) (model.SpotAccount, error) {
+	var account model.SpotAccount
+
+	query := "user_id = ? AND currency = ?"
+	err := s.db.Where(query, userId, currency).Find(&account).Error
+
+	return account, err
 }
 
 func (s *SpotAccountDao) getAccountList(userId int64, currencies []string) []model.SpotAccount {

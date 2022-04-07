@@ -14,3 +14,8 @@ type ExistAccountListReq struct {
 	UserIDList []int64 `json:"userIds"`
 	Currency   string  `json:"currency"`
 }
+
+type GetAccountReq struct {
+	UserId   int64  `json:"userId"`
+	Currency string `json:"currency"`
+}

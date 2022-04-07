@@ -17,7 +17,7 @@ import (
 // @Produce  json
 // @Param
 // @Success 200 {object}
-// @Router /v1/account/create_oneK [post]
+// @Router /v1/account/create_one [post]
 func CreateAccount(c *gin.Context) {
 	var req model.CreateAccountReq
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -82,6 +82,33 @@ func GetExistsAccounts(c *gin.Context) {
 	userIds, err := service.AccountServiceImpl.GetExistsAccounts(req.UserIDList, req.Currency)
 	if err != nil {
 		logger.Errorf("Get existing account list err : %v", err)
+		model.R.Error(c, intererr.ErrGetExitsAccount.WithDetails(err.Error()))
+		return
+	}
+
+	model.R.Success(c, userIds)
+}
+
+// CreateAccount 创建用户账户列表
+// @Summary 通过用户id列表和币种获取已经创建、存在的用户账户列表
+// @Description get account by user id and the currency
+// @Tags 账户
+// @Accept  json
+// @Produce  json
+// @Param
+// @Success 200 {object}
+// @Router /v1/account/get_one [post]
+func GetAccount(c *gin.Context) {
+	var req model.GetAccountReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Warnf("Get account bind params err : %v", err)
+		model.R.Error(c, baseerr.ErrBind.WithDetails(err.Error()))
+		return
+	}
+
+	userIds, err := service.AccountServiceImpl.GetAccount(req.UserId, req.Currency)
+	if err != nil {
+		logger.Errorf("Get account err : %v", err)
 		model.R.Error(c, intererr.ErrGetExitsAccount.WithDetails(err.Error()))
 		return
 	}
