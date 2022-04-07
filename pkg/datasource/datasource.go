@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 	"time"
 )
@@ -43,6 +44,7 @@ func InitGormDB() *gorm.DB {
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
+		Logger: logger.Default.LogMode(logger.Info), // print all sql
 	})
 	if err != nil {
 		logrus.WithFields(logrus.Fields{"connection": dsn, "err": err}).Fatalln("Gorm mysql start err")
