@@ -103,6 +103,7 @@ func Router() *gin.Engine {
 		apiV1.POST("/account/exist_list", controller.GetExistsAccounts)
 		apiV1.POST("/account/find_one", controller.FindAccount)
 		apiV1.POST("/account/find_list", controller.FindAccounts)
+		apiV1.POST("/account/has_balance", controller.HasBalance)
 	}
 
 	r.GET("/ping", func(c *gin.Context) {
