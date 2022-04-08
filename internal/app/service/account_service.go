@@ -3,6 +3,7 @@ package service
 import (
 	"account-module/internal/app/dao"
 	"account-module/internal/app/model"
+	"github.com/shopspring/decimal"
 )
 
 type IAccountService interface {
@@ -11,6 +12,7 @@ type IAccountService interface {
 	GetExistsAccounts(userIds []int64, currency string) ([]int64, error)
 	GetAccount(userId int64, currency string) (model.SpotAccount, error)
 	GetAccountsByUserId(userId int64) ([]model.SpotAccount, error)
+	HasBalance(userId int64, currency string, amount decimal.Decimal) (bool, error)
 }
 
 type AccountService struct {
@@ -40,4 +42,8 @@ func (s *AccountService) GetAccount(userId int64, currency string) (model.SpotAc
 
 func (s *AccountService) GetAccountsByUserId(userId int64) ([]model.SpotAccount, error) {
 	return s.spotAccountDao.GetAccountsByUserId(userId)
+}
+
+func (s *AccountService) HasBalance(userId int64, currency string, amount decimal.Decimal) (bool, error) {
+	return s.spotAccountDao.HasBalance(userId, currency, amount)
 }

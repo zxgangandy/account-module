@@ -142,3 +142,30 @@ func FindAccounts(c *gin.Context) {
 
 	model.R.Success(c, userIds)
 }
+
+// HasBalance 查询用户账户余额是否足够
+// @Summary 通过用户id、币种查询用户账户余额是否足够
+// @Description check用户余额
+// @Tags 账户
+// @Accept  json
+// @Produce  json
+// @Param
+// @Success 200 {object}
+// @Router /v1/account/has_balance [post]
+func HasBalance(c *gin.Context) {
+	var req model.HasBalanceReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Warnf("Has balance bind params err : %v", err)
+		model.R.Error(c, baseerr.ErrBind.WithDetails(err.Error()))
+		return
+	}
+
+	userIds, err := service.AccountServiceImpl.HasBalance(req.UserId, req.Currency, req.Amount)
+	if err != nil {
+		logger.Errorf("Has balance err : %v", err)
+		model.R.Error(c, intererr.ErrGetExitsAccount.WithDetails(err.Error()))
+		return
+	}
+
+	model.R.Success(c, userIds)
+}

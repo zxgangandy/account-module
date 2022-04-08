@@ -16,6 +16,7 @@ type ISpotAccountDao interface {
 	GetExistsAccounts(userIds []int64, currency string) ([]int64, error)
 	GetAccount(userId int64, currency string) (model.SpotAccount, error)
 	GetAccountsByUserId(userId int64) ([]model.SpotAccount, error)
+	HasBalance(userId int64, currency string, amount decimal.Decimal) (bool, error)
 }
 
 type SpotAccountDao struct {
@@ -87,6 +88,20 @@ func (s *SpotAccountDao) GetAccountsByUserId(userId int64) ([]model.SpotAccount,
 	query := "user_id = ?"
 	err := s.db.Where(query, userId).Find(&accounts).Error
 	return accounts, err
+}
+
+func (s *SpotAccountDao) HasBalance(userId int64, currency string, amount decimal.Decimal) (bool, error) {
+	account, err := s.GetAccount(userId, currency)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+
+	balance := account.Balance
+
+	return balance.GreaterThanOrEqual(amount), nil
 }
 
 func (s *SpotAccountDao) getAccountList(userId int64, currencies []string) []model.SpotAccount {
