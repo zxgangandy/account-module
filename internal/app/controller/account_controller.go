@@ -106,14 +106,14 @@ func FindAccount(c *gin.Context) {
 		return
 	}
 
-	userIds, err := service.AccountServiceImpl.GetAccount(req.UserId, req.Currency)
+	account, err := service.AccountServiceImpl.GetAccount(req.UserId, req.Currency)
 	if err != nil {
 		logger.Errorf("Get account err : %v", err)
 		model.R.Error(c, intererr.ErrGetExitsAccount.WithDetails(err.Error()))
 		return
 	}
 
-	model.R.Success(c, userIds)
+	model.R.Success(c, account)
 }
 
 // FindAccounts 查询用户账户列表
@@ -133,14 +133,14 @@ func FindAccounts(c *gin.Context) {
 		return
 	}
 
-	userIds, err := service.AccountServiceImpl.GetAccountsByUserId(req.UserId)
+	accounts, err := service.AccountServiceImpl.GetAccountsByUserId(req.UserId)
 	if err != nil {
 		logger.Errorf("Find accounts err : %v", err)
 		model.R.Error(c, intererr.ErrGetExitsAccount.WithDetails(err.Error()))
 		return
 	}
 
-	model.R.Success(c, userIds)
+	model.R.Success(c, accounts)
 }
 
 // HasBalance 查询用户账户余额是否足够
