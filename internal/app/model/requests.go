@@ -31,3 +31,11 @@ type HasBalanceReq struct {
 	Currency string          `json:"currency"`
 	Amount   decimal.Decimal `json:"currency"`
 }
+
+type FrozenReq struct {
+	OrderId  int64           `json:"orderId"`
+	UserId   int64           `json:"userId"`
+	Currency string          `json:"currency"`
+	BizType  string          `json:"bizType"`
+	Amount   decimal.Decimal `json:"currency"`
+}
