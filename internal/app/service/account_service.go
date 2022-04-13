@@ -14,6 +14,7 @@ type IAccountService interface {
 	GetAccountsByUserId(userId int64) ([]model.SpotAccount, error)
 	HasBalance(userId int64, currency string, amount decimal.Decimal) (bool, error)
 	GetLockedAccount(userId int64, currency string) (model.SpotAccount, error)
+	Frozen(req model.FrozenReq) error
 }
 
 type AccountService struct {
@@ -51,4 +52,8 @@ func (s *AccountService) HasBalance(userId int64, currency string, amount decima
 
 func (s *AccountService) GetLockedAccount(userId int64, currency string) (model.SpotAccount, error) {
 	return s.spotAccountDao.GetLockedAccount(userId, currency)
+}
+
+func (s *AccountService) Frozen(req model.FrozenReq) error {
+	return s.spotAccountDao.Frozen(req)
 }

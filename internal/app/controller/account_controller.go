@@ -169,3 +169,30 @@ func HasBalance(c *gin.Context) {
 
 	model.R.Success(c, userIds)
 }
+
+// Frozen 冻结用户账户余额
+// @Summary 通过用户id、币种冻结用户余额
+// @Description 冻结用户余额
+// @Tags 账户
+// @Accept  json
+// @Produce  json
+// @Param
+// @Success 200 {object}
+// @Router /v1/account/frozen_balance [post]
+func Frozen(c *gin.Context) {
+	var req model.FrozenReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Warnf("Frozen bind params err : %v", err)
+		model.R.Error(c, baseerr.ErrBind.WithDetails(err.Error()))
+		return
+	}
+
+	err := service.AccountServiceImpl.Frozen(req)
+	if err != nil {
+		logger.Errorf("Frozen err : %v", err)
+		model.R.Error(c, intererr.ErrGetExitsAccount.WithDetails(err.Error()))
+		return
+	}
+
+	model.R.Success(c, true)
+}
