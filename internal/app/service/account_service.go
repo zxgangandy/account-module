@@ -10,11 +10,12 @@ type IAccountService interface {
 	CreateAccount(userId int64, currency string) (bool, error)
 	CreateAccountList(userIds []int64, currencies []string) error
 	GetExistsAccounts(userIds []int64, currency string) ([]int64, error)
-	GetAccount(userId int64, currency string) (model.SpotAccount, error)
+	GetAccount(userId int64, currency string) (*model.SpotAccount, error)
 	GetAccountsByUserId(userId int64) ([]model.SpotAccount, error)
 	HasBalance(userId int64, currency string, amount decimal.Decimal) (bool, error)
-	GetLockedAccount(userId int64, currency string) (model.SpotAccount, error)
-	Frozen(req model.FrozenReq) error
+	GetLockedAccount(userId int64, currency string) (*model.SpotAccount, error)
+	Freeze(req *model.FreezeReq) error
+	Unfreeze(req *model.UnfreezeReq) error
 }
 
 type AccountService struct {
@@ -38,7 +39,7 @@ func (s *AccountService) GetExistsAccounts(userIds []int64, currency string) ([]
 	return s.spotAccountDao.GetExistsAccounts(userIds, currency)
 }
 
-func (s *AccountService) GetAccount(userId int64, currency string) (model.SpotAccount, error) {
+func (s *AccountService) GetAccount(userId int64, currency string) (*model.SpotAccount, error) {
 	return s.spotAccountDao.GetAccount(userId, currency)
 }
 
@@ -50,10 +51,14 @@ func (s *AccountService) HasBalance(userId int64, currency string, amount decima
 	return s.spotAccountDao.HasBalance(userId, currency, amount)
 }
 
-func (s *AccountService) GetLockedAccount(userId int64, currency string) (model.SpotAccount, error) {
+func (s *AccountService) GetLockedAccount(userId int64, currency string) (*model.SpotAccount, error) {
 	return s.spotAccountDao.GetLockedAccount(userId, currency)
 }
 
-func (s *AccountService) Frozen(req model.FrozenReq) error {
-	return s.spotAccountDao.Frozen(req)
+func (s *AccountService) Freeze(req *model.FreezeReq) error {
+	return s.spotAccountDao.Freeze(req)
+}
+
+func (s *AccountService) Unfreeze(req *model.UnfreezeReq) error {
+	return s.spotAccountDao.Unfreeze(req)
 }

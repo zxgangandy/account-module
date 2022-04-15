@@ -7,7 +7,7 @@ import (
 )
 
 type IAccountLogDao interface {
-	Create(frozen *model.SpotAccountLog) (bool, error)
+	Create(frozen *model.SpotAccountLog) error
 }
 
 type AccountLogDao struct {
@@ -18,11 +18,11 @@ func NewAccountLogDao() *AccountLogDao {
 	return &AccountLogDao{db: datasource.GetDB()}
 }
 
-func (s *AccountLogDao) Create(log *model.SpotAccountLog) (bool, error) {
+func (s *AccountLogDao) Create(log *model.SpotAccountLog) error {
 	err := s.db.Create(log).Error
-
 	if err != nil {
-		return false, err
+		return err
 	}
-	return true, nil
+
+	return nil
 }

@@ -104,7 +104,8 @@ func Router() *gin.Engine {
 		apiV1.POST("/account/find_one", controller.FindAccount)
 		apiV1.POST("/account/find_list", controller.FindAccounts)
 		apiV1.POST("/account/has_balance", controller.HasBalance)
-		apiV1.POST("/account/frozen_balance", controller.Frozen)
+		apiV1.POST("/account/freeze_order", controller.Freeze)
+		apiV1.POST("/account/unfreeze_order", controller.Unfreeze)
 	}
 
 	r.GET("/ping", func(c *gin.Context) {
