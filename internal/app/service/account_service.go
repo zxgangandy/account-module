@@ -97,7 +97,7 @@ func (s *AccountService) Freeze(req *model.FreezeReq) error {
 
 func (s *AccountService) Unfreeze(req *model.UnfreezeReq) error {
 	return s.db.Transaction(func(db *gorm.DB) error {
-		account, err := s.GetLockedAccount(req.UserId, req.Currency)
+		account, err := s.spotAccountDao.GetLockedAccount(req.UserId, req.Currency)
 		if err != nil {
 			return err
 		}
