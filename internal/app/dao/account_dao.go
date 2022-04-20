@@ -7,8 +7,6 @@ import (
 	"account-module/pkg/utils"
 	errs "errors"
 	"github.com/pkg/errors"
-
-	//"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
@@ -21,10 +19,12 @@ type ISpotAccountDao interface {
 	GetAccountsByUserId(userId int64) ([]model.SpotAccount, error)
 	HasBalance(userId int64, currency string, amount decimal.Decimal) (bool, error)
 	GetLockedAccount(userId int64, currency string) (*model.SpotAccount, error)
-	Freeze(req *model.FreezeReq) error
 	FreezeByUser(req *model.FreezeReq) (bool, error)
-	Unfreeze(req *model.UnfreezeReq) error
+	CreateFreezeOrder(account *model.SpotAccount, req *model.FreezeReq) *model.SpotAccountFrozen
+	CreateFreezeLog(account *model.SpotAccount, req *model.FreezeReq) *model.SpotAccountLog
 	UnfreezeByUser(req *model.UnfreezeReq) (bool, error)
+	CreateUnfreezeOrder(frozen *model.SpotAccountFrozen, req *model.UnfreezeReq) *model.SpotAccountUnfrozen
+	CreateUnfreezeLog(account *model.SpotAccount, req *model.UnfreezeReq) *model.SpotAccountLog
 }
 
 type SpotAccountDao struct {
@@ -35,16 +35,7 @@ type SpotAccountDao struct {
 }
 
 func NewSpotAccountDao() *SpotAccountDao {
-	frozenDao := NewAccountFrozenDao()
-	unfreezeDao := NewAccountUnfreezeDao()
-	logDao := NewAccountLogDao()
-
-	return &SpotAccountDao{
-		db:          datasource.GetDB(),
-		frozenDao:   frozenDao,
-		unfreezeDao: unfreezeDao,
-		logDao:      logDao,
-	}
+	return &SpotAccountDao{db: datasource.GetDB()}
 }
 
 func (s *SpotAccountDao) Create(userId int64, currency string) (bool, error) {
@@ -133,34 +124,6 @@ func (s *SpotAccountDao) GetLockedAccount(userId int64, currency string) (*model
 	return &account, err
 }
 
-func (s *SpotAccountDao) Freeze(req *model.FreezeReq) error {
-	return s.db.Transaction(func(db *gorm.DB) error {
-		account, err := s.GetLockedAccount(req.UserId, req.Currency)
-		if err != nil {
-			return err
-		}
-
-		result, err := s.FreezeByUser(req)
-		if !result {
-			return errors.New("freeze failed: maybe balance not enough")
-		} else if err != nil {
-			return err
-		}
-
-		err = s.frozenDao.Create(s.createFreezeOrder(account, req))
-		if err != nil {
-			return err
-		}
-
-		err = s.logDao.Create(s.createFreezeLog(account, req))
-		if err != nil {
-			return err
-		}
-
-		return nil
-	})
-}
-
 func (s *SpotAccountDao) FreezeByUser(req *model.FreezeReq) (bool, error) {
 	query := "user_id = ? AND currency = ? AND balance >= ?"
 	result := s.db.Model(&model.SpotAccount{}).
@@ -171,51 +134,6 @@ func (s *SpotAccountDao) FreezeByUser(req *model.FreezeReq) (bool, error) {
 		})
 
 	return result.RowsAffected >= 1, result.Error
-}
-
-func (s *SpotAccountDao) Unfreeze(req *model.UnfreezeReq) error {
-	return s.db.Transaction(func(db *gorm.DB) error {
-		account, err := s.GetLockedAccount(req.UserId, req.Currency)
-		if err != nil {
-			return err
-		}
-
-		if account.Frozen.LessThan(req.Amount) {
-			return errors.Errorf("unfreeze amount: %+v bigger than frozen "+
-				"amount: %+v", req.Amount, account.Frozen)
-		}
-
-		result, err := s.UnfreezeByUser(req)
-		if !result {
-			return errors.New("unfreeze failed: maybe balance not enough")
-		} else if err != nil {
-			return err
-		}
-
-		result, err = s.frozenDao.UpdateUnfreeze(req)
-		if !result {
-			return errors.New("mysql error: update freeze order failed")
-		} else if err != nil {
-			return err
-		}
-
-		frozen, err := s.frozenDao.Get(req.OrderId, req.BizType)
-		if err != nil {
-			return err
-		}
-
-		err = s.unfreezeDao.Create(s.createUnfreezeOrder(frozen, req))
-		if err != nil {
-			return err
-		}
-
-		err = s.logDao.Create(s.createUnfreezeLog(account, req))
-		if err != nil {
-			return err
-		}
-
-		return nil
-	})
 }
 
 func (s *SpotAccountDao) UnfreezeByUser(req *model.UnfreezeReq) (bool, error) {
@@ -244,7 +162,7 @@ func (s *SpotAccountDao) getAccountList(userId int64, currencies []string) []mod
 	return accountList
 }
 
-func (s *SpotAccountDao) createFreezeOrder(account *model.SpotAccount, req *model.FreezeReq) *model.SpotAccountFrozen {
+func (s *SpotAccountDao) CreateFreezeOrder(account *model.SpotAccount, req *model.FreezeReq) *model.SpotAccountFrozen {
 	return &model.SpotAccountFrozen{
 		UserId:       account.UserId,
 		Currency:     account.Currency,
@@ -256,7 +174,7 @@ func (s *SpotAccountDao) createFreezeOrder(account *model.SpotAccount, req *mode
 	}
 }
 
-func (s *SpotAccountDao) createFreezeLog(account *model.SpotAccount, req *model.FreezeReq) *model.SpotAccountLog {
+func (s *SpotAccountDao) CreateFreezeLog(account *model.SpotAccount, req *model.FreezeReq) *model.SpotAccountLog {
 	return &model.SpotAccountLog{
 		FromUserId:    account.UserId,
 		ToUserId:      account.UserId,
@@ -273,7 +191,7 @@ func (s *SpotAccountDao) createFreezeLog(account *model.SpotAccount, req *model.
 	}
 }
 
-func (s *SpotAccountDao) createUnfreezeOrder(frozen *model.SpotAccountFrozen, req *model.UnfreezeReq) *model.SpotAccountUnfrozen {
+func (s *SpotAccountDao) CreateUnfreezeOrder(frozen *model.SpotAccountFrozen, req *model.UnfreezeReq) *model.SpotAccountUnfrozen {
 	return &model.SpotAccountUnfrozen{
 		BizId:        idgen.Get().GetUID(),
 		UserId:       req.UserId,
@@ -287,7 +205,7 @@ func (s *SpotAccountDao) createUnfreezeOrder(frozen *model.SpotAccountFrozen, re
 	}
 }
 
-func (s *SpotAccountDao) createUnfreezeLog(account *model.SpotAccount, req *model.UnfreezeReq) *model.SpotAccountLog {
+func (s *SpotAccountDao) CreateUnfreezeLog(account *model.SpotAccount, req *model.UnfreezeReq) *model.SpotAccountLog {
 	return &model.SpotAccountLog{
 		FromUserId:    account.UserId,
 		ToUserId:      account.UserId,
