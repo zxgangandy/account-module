@@ -18,11 +18,6 @@ func NewAccountUnfreezeDao() *AccountUnfreezeDao {
 	return &AccountUnfreezeDao{db: datasource.GetDB()}
 }
 
-func (s *AccountUnfreezeDao) Create(unfrozen *model.SpotAccountUnfrozen) error {
-	err := s.db.Create(unfrozen).Error
-
-	if err != nil {
-		return err
-	}
-	return nil
+func (d *AccountUnfreezeDao) Create(unfrozen *model.SpotAccountUnfrozen) error {
+	return d.db.Create(unfrozen).Error
 }

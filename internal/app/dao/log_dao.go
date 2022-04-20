@@ -18,11 +18,6 @@ func NewAccountLogDao() *AccountLogDao {
 	return &AccountLogDao{db: datasource.GetDB()}
 }
 
-func (s *AccountLogDao) Create(log *model.SpotAccountLog) error {
-	err := s.db.Create(log).Error
-	if err != nil {
-		return err
-	}
-
-	return nil
+func (d *AccountLogDao) Create(log *model.SpotAccountLog) error {
+	return d.db.Create(log).Error
 }
