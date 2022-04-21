@@ -12,7 +12,7 @@ import (
 )
 
 type ISpotAccountDao interface {
-	Create(userId int64, currency string) (bool, error)
+	Save(userId int64, currency string) (bool, error)
 	CreateAccountList(userIds []int64, currencies []string) error
 	GetExistsAccounts(userIds []int64, currency string) ([]int64, error)
 	GetAccount(userId int64, currency string) (*model.SpotAccount, error)
@@ -20,11 +20,8 @@ type ISpotAccountDao interface {
 	HasBalance(userId int64, currency string, amount decimal.Decimal) (bool, error)
 	GetLockedAccount(userId int64, currency string) (*model.SpotAccount, error)
 	FreezeByUser(req *model.FreezeReq) (bool, error)
-	CreateFreezeOrder(account *model.SpotAccount, req *model.FreezeReq) *model.SpotAccountFrozen
-	CreateFreezeLog(account *model.SpotAccount, req *model.FreezeReq) *model.SpotAccountLog
 	UnfreezeByUser(req *model.UnfreezeReq) (bool, error)
-	CreateUnfreezeOrder(frozen *model.SpotAccountFrozen, req *model.UnfreezeReq) *model.SpotAccountUnfrozen
-	CreateUnfreezeLog(account *model.SpotAccount, req *model.UnfreezeReq) *model.SpotAccountLog
+	DepositByUser(req *model.DepositReq) (bool, error)
 }
 
 type SpotAccountDao struct {
@@ -38,7 +35,7 @@ func NewSpotAccountDao() *SpotAccountDao {
 	return &SpotAccountDao{db: datasource.GetDB()}
 }
 
-func (d *SpotAccountDao) Create(userId int64, currency string) (bool, error) {
+func (d *SpotAccountDao) Save(userId int64, currency string) (bool, error) {
 	err := d.db.Create(&model.SpotAccount{
 		AccountId: idgen.Get().GetUID(),
 		UserId:    userId,
@@ -147,6 +144,17 @@ func (d *SpotAccountDao) UnfreezeByUser(req *model.UnfreezeReq) (bool, error) {
 	return result.RowsAffected >= 1, result.Error
 }
 
+func (d *SpotAccountDao) DepositByUser(req *model.DepositReq) (bool, error) {
+	query := "user_id = ? AND currency = ?"
+	result := d.db.Model(&model.SpotAccount{}).
+		Where(query, req.UserId, req.Currency, req.Amount).
+		Updates(map[string]interface{}{
+			"balance": gorm.Expr("balance - ?", req.Amount),
+		})
+
+	return result.RowsAffected >= 1, result.Error
+}
+
 func (d *SpotAccountDao) getAccountList(userId int64, currencies []string) []model.SpotAccount {
 	var accountList []model.SpotAccount
 
@@ -160,64 +168,4 @@ func (d *SpotAccountDao) getAccountList(userId int64, currencies []string) []mod
 	}
 
 	return accountList
-}
-
-func (d *SpotAccountDao) CreateFreezeOrder(account *model.SpotAccount, req *model.FreezeReq) *model.SpotAccountFrozen {
-	return &model.SpotAccountFrozen{
-		UserId:       account.UserId,
-		Currency:     account.Currency,
-		AccountId:    account.AccountId,
-		OrderId:      req.OrderId,
-		BizType:      req.BizType,
-		OriginFrozen: req.Amount,
-		LeftFrozen:   req.Amount,
-	}
-}
-
-func (d *SpotAccountDao) CreateFreezeLog(account *model.SpotAccount, req *model.FreezeReq) *model.SpotAccountLog {
-	return &model.SpotAccountLog{
-		FromUserId:    account.UserId,
-		ToUserId:      account.UserId,
-		Currency:      account.Currency,
-		FromAccountId: account.AccountId,
-		ToAccountId:   account.AccountId,
-		OrderId:       req.OrderId,
-		BizType:       req.BizType,
-		BeforeBalance: account.Balance,
-		Balance:       account.Balance.Sub(req.Amount),
-		BeforeFrozen:  account.Frozen,
-		Frozen:        account.Frozen.Add(req.Amount),
-		Amount:        req.Amount,
-	}
-}
-
-func (d *SpotAccountDao) CreateUnfreezeOrder(frozen *model.SpotAccountFrozen, req *model.UnfreezeReq) *model.SpotAccountUnfrozen {
-	return &model.SpotAccountUnfrozen{
-		BizId:        idgen.Get().GetUID(),
-		UserId:       req.UserId,
-		Currency:     req.Currency,
-		AccountId:    frozen.AccountId,
-		OrderId:      req.OrderId,
-		BizType:      req.BizType,
-		OriginFrozen: frozen.OriginFrozen,
-		LeftFrozen:   frozen.LeftFrozen.Sub(req.Amount),
-		Unfrozen:     req.Amount,
-	}
-}
-
-func (d *SpotAccountDao) CreateUnfreezeLog(account *model.SpotAccount, req *model.UnfreezeReq) *model.SpotAccountLog {
-	return &model.SpotAccountLog{
-		FromUserId:    account.UserId,
-		ToUserId:      account.UserId,
-		Currency:      account.Currency,
-		FromAccountId: account.AccountId,
-		ToAccountId:   account.AccountId,
-		OrderId:       req.OrderId,
-		BizType:       req.BizType,
-		BeforeBalance: account.Balance,
-		Balance:       account.Balance.Add(req.Amount),
-		BeforeFrozen:  account.Frozen,
-		Frozen:        account.Frozen.Sub(req.Amount),
-		Amount:        req.Amount,
-	}
 }

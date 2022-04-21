@@ -7,9 +7,10 @@ import (
 )
 
 type IAccountFrozenDao interface {
-	Create(frozen *model.SpotAccountFrozen) error
+	Save(frozen *model.SpotAccountFrozen) error
 	UpdateUnfreeze(req *model.UnfreezeReq) (bool, error)
 	Get(orderId int64, bizType string) (*model.SpotAccountFrozen, error)
+	CreateFreezeOrder(account *model.SpotAccount, req *model.FreezeReq) *model.SpotAccountFrozen
 }
 
 type AccountFrozenDao struct {
@@ -20,7 +21,7 @@ func NewAccountFrozenDao() *AccountFrozenDao {
 	return &AccountFrozenDao{db: datasource.GetDB()}
 }
 
-func (d *AccountFrozenDao) Create(frozen *model.SpotAccountFrozen) error {
+func (d *AccountFrozenDao) Save(frozen *model.SpotAccountFrozen) error {
 	return d.db.Create(frozen).Error
 }
 
@@ -42,4 +43,16 @@ func (d *AccountFrozenDao) Get(orderId int64, bizType string) (*model.SpotAccoun
 	err := d.db.Where(query, orderId, bizType).Find(&frozen).Error
 
 	return &frozen, err
+}
+
+func (d *AccountFrozenDao) CreateFreezeOrder(account *model.SpotAccount, req *model.FreezeReq) *model.SpotAccountFrozen {
+	return &model.SpotAccountFrozen{
+		UserId:       account.UserId,
+		Currency:     account.Currency,
+		AccountId:    account.AccountId,
+		OrderId:      req.OrderId,
+		BizType:      req.BizType,
+		OriginFrozen: req.Amount,
+		LeftFrozen:   req.Amount,
+	}
 }

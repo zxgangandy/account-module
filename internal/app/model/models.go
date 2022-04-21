@@ -44,6 +44,21 @@ type SpotAccountUnfrozen struct {
 	UpdatedAt    time.Time
 }
 
+type SpotAccountTrade struct {
+	Id            uint64          `gorm:"column:id;primary_key;AUTO_INCREMENT"`
+	UserId        int64           `gorm:"column:user_id"`
+	Currency      string          `gorm:"column:currency"`
+	AccountId     int64           `gorm:"column:account_id"`
+	OrderId       int64           `gorm:"column:account_id"`
+	BizType       string          `gorm:"column:biz_type"`
+	TradeType     string          `gorm:"column:trade_type"`
+	BeforeBalance decimal.Decimal `gorm:"column:before_balance" sql:"type:decimal(32,16);"`
+	AfterBalance  decimal.Decimal `gorm:"column:after_balance" sql:"type:decimal(32,16);"`
+	Amount        decimal.Decimal `gorm:"column:amount" sql:"type:decimal(32,16);"`
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
+
 type SpotAccountLog struct {
 	Id            uint64          `gorm:"column:id;primary_key;AUTO_INCREMENT"`
 	FromUserId    int64           `gorm:"column:from_user_id"`

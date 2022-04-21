@@ -18,6 +18,7 @@ type IAccountService interface {
 	HasBalance(userId int64, currency string, amount decimal.Decimal) (bool, error)
 	Freeze(req *model.FreezeReq) error
 	Unfreeze(req *model.UnfreezeReq) error
+	Deposit(req *model.DepositReq) error
 }
 
 type AccountService struct {
@@ -25,6 +26,7 @@ type AccountService struct {
 	spotAccountDao dao.ISpotAccountDao
 	frozenDao      dao.IAccountFrozenDao
 	unfreezeDao    dao.IAccountUnFreezeDao
+	tradeDao       dao.IAccountTradeDao
 	logDao         dao.IAccountLogDao
 }
 
@@ -32,18 +34,20 @@ func NewAccountService() *AccountService {
 	spotAccountDao := dao.NewSpotAccountDao()
 	frozenDao := dao.NewAccountFrozenDao()
 	unfreezeDao := dao.NewAccountUnfreezeDao()
+	tradeDao := dao.NewAccountTradeDao()
 	logDao := dao.NewAccountLogDao()
 	return &AccountService{
 		db:             datasource.GetDB(),
 		spotAccountDao: spotAccountDao,
 		frozenDao:      frozenDao,
 		unfreezeDao:    unfreezeDao,
+		tradeDao:       tradeDao,
 		logDao:         logDao,
 	}
 }
 
 func (s *AccountService) CreateAccount(userId int64, currency string) (bool, error) {
-	return s.spotAccountDao.Create(userId, currency)
+	return s.spotAccountDao.Save(userId, currency)
 }
 
 func (s *AccountService) CreateAccountList(userIds []int64, currencies []string) error {
@@ -81,12 +85,12 @@ func (s *AccountService) Freeze(req *model.FreezeReq) error {
 			return err
 		}
 
-		err = s.frozenDao.Create(s.spotAccountDao.CreateFreezeOrder(account, req))
+		err = s.frozenDao.Save(s.frozenDao.CreateFreezeOrder(account, req))
 		if err != nil {
 			return err
 		}
 
-		err = s.logDao.Create(s.spotAccountDao.CreateFreezeLog(account, req))
+		err = s.logDao.Save(s.logDao.CreateFreezeLog(account, req))
 		if err != nil {
 			return err
 		}
@@ -126,12 +130,40 @@ func (s *AccountService) Unfreeze(req *model.UnfreezeReq) error {
 			return err
 		}
 
-		err = s.unfreezeDao.Create(s.spotAccountDao.CreateUnfreezeOrder(frozen, req))
+		err = s.unfreezeDao.Save(s.unfreezeDao.CreateUnfreezeOrder(frozen, req))
 		if err != nil {
 			return err
 		}
 
-		err = s.logDao.Create(s.spotAccountDao.CreateUnfreezeLog(account, req))
+		err = s.logDao.Save(s.logDao.CreateUnfreezeLog(account, req))
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
+func (s *AccountService) Deposit(req *model.DepositReq) error {
+	return s.db.Transaction(func(db *gorm.DB) error {
+		account, err := s.spotAccountDao.GetLockedAccount(req.UserId, req.Currency)
+		if err != nil {
+			return err
+		}
+
+		result, err := s.spotAccountDao.DepositByUser(req)
+		if !result {
+			return errors.New("mysql error: deposit update account balance failed")
+		} else if err != nil {
+			return err
+		}
+
+		err = s.tradeDao.Save(s.tradeDao.CreateDepositOrder(account, req))
+		if err != nil {
+			return err
+		}
+
+		err = s.logDao.Save(s.logDao.CreateDepositLog(account, req))
 		if err != nil {
 			return err
 		}

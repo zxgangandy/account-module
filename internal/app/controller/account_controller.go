@@ -223,3 +223,30 @@ func Unfreeze(c *gin.Context) {
 
 	model.R.Success(c, true)
 }
+
+// Frozen 冻结用户账户余额
+// @Summary 通过用户id、币种冻结用户余额
+// @Description 冻结用户余额
+// @Tags 账户
+// @Accept  json
+// @Produce  json
+// @Param
+// @Success 200 {object}
+// @Router /v1/account/deposit [post]
+func Deposit(c *gin.Context) {
+	var req model.DepositReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Warnf("Deposit bind params err : %v", err)
+		model.R.Error(c, baseerr.ErrBind.WithDetails(err.Error()))
+		return
+	}
+
+	err := service.AccountServiceImpl.Deposit(&req)
+	if err != nil {
+		logger.Errorf("Deposit err : %v", err)
+		model.R.Error(c, intererr.ErrGetExitsAccount.WithDetails(err.Error()))
+		return
+	}
+
+	model.R.Success(c, true)
+}
