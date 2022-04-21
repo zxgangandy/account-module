@@ -22,6 +22,7 @@ type ISpotAccountDao interface {
 	FreezeByUser(req *model.FreezeReq) (bool, error)
 	UnfreezeByUser(req *model.UnfreezeReq) (bool, error)
 	DepositByUser(req *model.DepositReq) (bool, error)
+	WithdrawByUser(req *model.WithdrawReq) (bool, error)
 }
 
 type SpotAccountDao struct {
@@ -145,6 +146,17 @@ func (d *SpotAccountDao) UnfreezeByUser(req *model.UnfreezeReq) (bool, error) {
 }
 
 func (d *SpotAccountDao) DepositByUser(req *model.DepositReq) (bool, error) {
+	query := "user_id = ? AND currency = ?"
+	result := d.db.Model(&model.SpotAccount{}).
+		Where(query, req.UserId, req.Currency, req.Amount).
+		Updates(map[string]interface{}{
+			"balance": gorm.Expr("balance + ?", req.Amount),
+		})
+
+	return result.RowsAffected >= 1, result.Error
+}
+
+func (d *SpotAccountDao) WithdrawByUser(req *model.WithdrawReq) (bool, error) {
 	query := "user_id = ? AND currency = ?"
 	result := d.db.Model(&model.SpotAccount{}).
 		Where(query, req.UserId, req.Currency, req.Amount).

@@ -11,6 +11,7 @@ type IAccountLogDao interface {
 	CreateFreezeLog(account *model.SpotAccount, req *model.FreezeReq) *model.SpotAccountLog
 	CreateUnfreezeLog(account *model.SpotAccount, req *model.UnfreezeReq) *model.SpotAccountLog
 	CreateDepositLog(account *model.SpotAccount, req *model.DepositReq) *model.SpotAccountLog
+	CreateWithdrawLog(account *model.SpotAccount, req *model.WithdrawReq) *model.SpotAccountLog
 }
 
 type AccountLogDao struct {
@@ -70,6 +71,23 @@ func (d *AccountLogDao) CreateDepositLog(account *model.SpotAccount, req *model.
 		BizType:       req.BizType,
 		BeforeBalance: account.Balance,
 		Balance:       account.Balance.Add(req.Amount),
+		BeforeFrozen:  account.Frozen,
+		Frozen:        account.Frozen,
+		Amount:        req.Amount,
+	}
+}
+
+func (d *AccountLogDao) CreateWithdrawLog(account *model.SpotAccount, req *model.WithdrawReq) *model.SpotAccountLog {
+	return &model.SpotAccountLog{
+		FromUserId:    account.UserId,
+		ToUserId:      account.UserId,
+		Currency:      account.Currency,
+		FromAccountId: account.AccountId,
+		ToAccountId:   account.AccountId,
+		OrderId:       req.OrderId,
+		BizType:       req.BizType,
+		BeforeBalance: account.Balance,
+		Balance:       account.Balance.Sub(req.Amount),
 		BeforeFrozen:  account.Frozen,
 		Frozen:        account.Frozen,
 		Amount:        req.Amount,

@@ -19,6 +19,7 @@ type IAccountService interface {
 	Freeze(req *model.FreezeReq) error
 	Unfreeze(req *model.UnfreezeReq) error
 	Deposit(req *model.DepositReq) error
+	Withdraw(req *model.WithdrawReq) error
 }
 
 type AccountService struct {
@@ -164,6 +165,40 @@ func (s *AccountService) Deposit(req *model.DepositReq) error {
 		}
 
 		err = s.logDao.Save(s.logDao.CreateDepositLog(account, req))
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
+func (s *AccountService) Withdraw(req *model.WithdrawReq) error {
+	return s.db.Transaction(func(db *gorm.DB) error {
+		account, err := s.spotAccountDao.GetLockedAccount(req.UserId, req.Currency)
+		if err != nil {
+			return err
+		}
+
+		if account.Balance.LessThan(req.Amount) {
+			return errors.Errorf("withdraw amount: %v bigger than balance "+
+				"amount: %v", req.Amount, account.Balance)
+		}
+
+		result, err := s.spotAccountDao.WithdrawByUser(req)
+		if !result {
+			return errors.Errorf("withdraw balance is not enough, "+
+				"balance=%v, withdraw amount=%v", account.Balance, req.Amount)
+		} else if err != nil {
+			return err
+		}
+
+		err = s.tradeDao.Save(s.tradeDao.CreateWithdrawOrder(account, req))
+		if err != nil {
+			return err
+		}
+
+		err = s.logDao.Save(s.logDao.CreateWithdrawLog(account, req))
 		if err != nil {
 			return err
 		}

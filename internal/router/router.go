@@ -107,6 +107,7 @@ func Router() *gin.Engine {
 		apiV1.POST("/account/freeze", controller.Freeze)
 		apiV1.POST("/account/unfreeze", controller.Unfreeze)
 		apiV1.POST("/account/deposit", controller.Deposit)
+		apiV1.POST("/account/withdraw", controller.Withdraw)
 	}
 
 	r.GET("/ping", func(c *gin.Context) {

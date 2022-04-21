@@ -9,6 +9,7 @@ import (
 type IAccountTradeDao interface {
 	Save(frozen *model.SpotAccountTrade) error
 	CreateDepositOrder(frozen *model.SpotAccount, req *model.DepositReq) *model.SpotAccountTrade
+	CreateWithdrawOrder(frozen *model.SpotAccount, req *model.WithdrawReq) *model.SpotAccountTrade
 }
 
 type AccountTradeDao struct {
@@ -33,6 +34,20 @@ func (d *AccountTradeDao) CreateDepositOrder(account *model.SpotAccount, req *mo
 		TradeType:     "in",
 		BeforeBalance: account.Balance,
 		AfterBalance:  account.Balance.Add(req.Amount),
+		Amount:        req.Amount,
+	}
+}
+
+func (d *AccountTradeDao) CreateWithdrawOrder(account *model.SpotAccount, req *model.DepositReq) *model.SpotAccountTrade {
+	return &model.SpotAccountTrade{
+		UserId:        req.UserId,
+		Currency:      req.Currency,
+		AccountId:     account.AccountId,
+		OrderId:       req.OrderId,
+		BizType:       req.BizType,
+		TradeType:     "out",
+		BeforeBalance: account.Balance,
+		AfterBalance:  account.Balance.Sub(req.Amount),
 		Amount:        req.Amount,
 	}
 }
