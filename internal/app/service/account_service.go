@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
+	"sort"
 )
 
 type IAccountService interface {
@@ -20,6 +21,7 @@ type IAccountService interface {
 	Unfreeze(req *model.UnfreezeReq) error
 	Deposit(req *model.DepositReq) error
 	Withdraw(req *model.WithdrawReq) error
+	Transfer(req *model.TransferReq) error
 }
 
 type AccountService struct {
@@ -205,4 +207,56 @@ func (s *AccountService) Withdraw(req *model.WithdrawReq) error {
 
 		return nil
 	})
+}
+
+func (s *AccountService) Transfer(req *model.TransferReq) error {
+	withdraw := &model.WithdrawReq{
+		UserId:   req.FromUserId,
+		Currency: req.Currency,
+		OrderId:  req.OrderId,
+		BizType:  req.BizType,
+		Amount:   req.Amount,
+	}
+	deposit := &model.DepositReq{
+		UserId:   req.ToUserId,
+		Currency: req.Currency,
+		OrderId:  req.OrderId,
+		BizType:  req.BizType,
+		Amount:   req.Amount,
+	}
+
+	return s.db.Transaction(func(db *gorm.DB) error {
+		s.lockAccounts(withdraw, deposit)
+		s.Withdraw(withdraw)
+		s.Deposit(deposit)
+		return nil
+	})
+}
+
+func (s *AccountService) lockAccounts(withdraw *model.WithdrawReq, deposit *model.DepositReq) error {
+	withdrawAccount := model.SpotAccount{
+		UserId:   withdraw.UserId,
+		Currency: withdraw.Currency,
+	}
+
+	depositAccount := model.SpotAccount{
+		UserId:   deposit.UserId,
+		Currency: deposit.Currency,
+	}
+
+	var accounts []model.SpotAccount
+	accounts = append(accounts, withdrawAccount, depositAccount)
+
+	sort.Slice(accounts, func(i, j int) bool {
+		return accounts[i].UserId < accounts[j].UserId
+	})
+
+	for _, v := range accounts {
+		_, err := s.spotAccountDao.GetLockedAccount(v.UserId, v.Currency)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

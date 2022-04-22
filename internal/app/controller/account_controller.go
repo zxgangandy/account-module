@@ -277,3 +277,30 @@ func Withdraw(c *gin.Context) {
 
 	model.R.Success(c, true)
 }
+
+// Frozen 冻结用户账户余额
+// @Summary 通过用户id、币种冻结用户余额
+// @Description 冻结用户余额
+// @Tags 账户
+// @Accept  json
+// @Produce  json
+// @Param
+// @Success 200 {object}
+// @Router /v1/account/transfer [post]
+func Transfer(c *gin.Context) {
+	var req model.TransferReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Warnf("Transfer bind params err : %v", err)
+		model.R.Error(c, baseerr.ErrBind.WithDetails(err.Error()))
+		return
+	}
+
+	err := service.AccountServiceImpl.Transfer(&req)
+	if err != nil {
+		logger.Errorf("Transfer err : %v", err)
+		model.R.Error(c, intererr.ErrGetExitsAccount.WithDetails(err.Error()))
+		return
+	}
+
+	model.R.Success(c, true)
+}

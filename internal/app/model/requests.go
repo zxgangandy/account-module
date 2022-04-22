@@ -63,3 +63,12 @@ type WithdrawReq struct {
 	BizType  string          `json:"bizType"`
 	Amount   decimal.Decimal `json:"currency"`
 }
+
+type TransferReq struct {
+	OrderId    int64           `json:"orderId"`
+	FromUserId int64           `json:"fromUserId"`
+	ToUserId   int64           `json:"toUserId"`
+	Currency   string          `json:"currency"`
+	BizType    string          `json:"bizType"`
+	Amount     decimal.Decimal `json:"currency"`
+}
