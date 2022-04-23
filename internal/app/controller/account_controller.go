@@ -278,9 +278,9 @@ func Withdraw(c *gin.Context) {
 	model.R.Success(c, true)
 }
 
-// Frozen 冻结用户账户余额
-// @Summary 通过用户id、币种冻结用户余额
-// @Description 冻结用户余额
+// Transfer 转账
+// @Summary 用户A出金，用户B入金
+// @Description 转账
 // @Tags 账户
 // @Accept  json
 // @Produce  json
